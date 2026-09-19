@@ -22,10 +22,10 @@ export function makePassword(
   rand: () => number = () => randomInt(1 << 30) / (1 << 30),
 ): string {
   let word = "";
-  while (word.length < 6) {
+  while (word.length < 7) {
     word += pick(ONSETS, rand) + pick(NUCLEI, rand);
   }
-  word += pick(CODAS, rand);
+  word += pick(CODAS, rand); // 7 + at least 1 keeps every password 8-14 characters
   return word.slice(0, 14).toUpperCase();
 }
 
