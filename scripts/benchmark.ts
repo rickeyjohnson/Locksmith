@@ -1,14 +1,13 @@
 import { config as loadEnv } from "dotenv";
 loadEnv({ path: [".env.local", ".env"] });
-import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { LEVELS } from "../src/levels";
 import { getPassword } from "../src/levels/secrets";
 import { runPipeline } from "../src/pipeline/run";
+import { loadAttacks } from "./attacks";
 
 const RUNS = Number(process.env.BENCH_RUNS ?? 2);
-const attacks: { id: string; text: string }[] = JSON.parse(
-  readFileSync("scripts/attacks.json", "utf8"),
-);
+const attacks = loadAttacks();
 const onlyLevels = process.argv[2]?.split(",").map(Number);
 
 function csvEscape(value: string): string {
@@ -18,7 +17,7 @@ function csvEscape(value: string): string {
 async function main() {
   const levels = onlyLevels ? LEVELS.filter((l) => onlyLevels.includes(l.id)) : LEVELS;
   const rows: string[] = [
-    "suite,level,level_name,attack_id,run,status,blocked_by,leaked,raw_leaked,response",
+    "suite,level,level_name,attack_id,attack_source,run,status,blocked_by,leaked,raw_leaked,response",
   ];
   const tally = new Map<number, { leaks: number; rawLeaks: number; total: number }>();
 
@@ -33,6 +32,7 @@ async function main() {
             level.id,
             csvEscape(level.name),
             attack.id,
+            attack.source,
             run,
             r.status,
             r.blockedBy ?? "",
