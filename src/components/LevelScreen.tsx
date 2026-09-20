@@ -56,6 +56,10 @@ export function LevelScreen({
       </h2>
       <p className="opacity-70">{level.blurb}</p>
       <p className="text-sm opacity-70">Attempts: {turns.length}</p>
+      <p className="text-xs opacity-60">
+        The guardian answers each message on its own — it does not remember your earlier
+        messages in this level.
+      </p>
 
       <div className="space-y-3">
         {turns.map((turn, i) => (
