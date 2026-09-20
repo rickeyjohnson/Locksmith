@@ -4,7 +4,7 @@ import { getLevel } from "@/levels";
 import { getPassword } from "@/levels/secrets";
 import { runPipeline } from "@/pipeline/run";
 import { verifyPlayerId } from "@/session";
-import { jsonlStore } from "@/store/jsonl";
+import { getStore } from "@/store";
 import { config } from "@/config";
 
 const RATE_LIMIT = 10;
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
 
   const password = getPassword(level.id);
   const result = await runPipeline(level, password, prompt);
-  const store = jsonlStore(config.dataFile);
+  const store = getStore();
   const attemptNo = (await store.countAttempts(playerId, level.id)) + 1;
 
   await store.saveAttempt({

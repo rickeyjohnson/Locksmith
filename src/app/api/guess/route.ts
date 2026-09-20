@@ -3,8 +3,7 @@ import { randomUUID } from "node:crypto";
 import { getLevel } from "@/levels";
 import { getPassword } from "@/levels/secrets";
 import { verifyPlayerId } from "@/session";
-import { jsonlStore } from "@/store/jsonl";
-import { config } from "@/config";
+import { getStore } from "@/store";
 
 export async function POST(req: Request) {
   const cookie = req.headers.get("cookie")?.match(/ls_pid=([^;]+)/)?.[1];
@@ -18,7 +17,7 @@ export async function POST(req: Request) {
   }
 
   const correct = guess.trim().toLowerCase() === getPassword(level.id).toLowerCase();
-  const store = jsonlStore(config.dataFile);
+  const store = getStore();
   const attemptsBefore = await store.countAttempts(playerId, level.id);
 
   await store.saveGuess({
