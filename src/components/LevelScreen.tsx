@@ -78,6 +78,12 @@ export function LevelScreen({
             </p>
           </div>
         ))}
+        {busy && (
+          <p className="rounded bg-black/5 p-2 opacity-70 dark:bg-white/10">
+            <strong>Guardian:</strong> <span className="animate-pulse">thinking…</span>{" "}
+            <span className="text-xs">(this can take up to half a minute on the later levels)</span>
+          </p>
+        )}
       </div>
 
       <form
