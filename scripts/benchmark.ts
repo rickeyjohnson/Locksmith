@@ -2,6 +2,7 @@ import { config as loadEnv } from "dotenv";
 loadEnv({ path: [".env.local", ".env"] });
 import { mkdirSync, writeFileSync } from "node:fs";
 import { LEVELS } from "../src/levels";
+import { ISOLATED_LEVELS } from "../src/levels/isolated";
 import { getPassword } from "../src/levels/secrets";
 import { runPipeline } from "../src/pipeline/run";
 import { loadAttacks } from "./attacks";
@@ -15,20 +16,23 @@ function csvEscape(value: string): string {
 }
 
 async function main() {
-  const levels = onlyLevels ? LEVELS.filter((l) => onlyLevels.includes(l.id)) : LEVELS;
+  const suite = process.env.BENCH_SUITE ?? "stacked";
+  const pool = suite === "isolated" ? ISOLATED_LEVELS : LEVELS;
+  const levels = onlyLevels ? pool.filter((l) => onlyLevels.includes(l.id)) : pool;
   const rows: string[] = [
     "suite,level,level_name,attack_id,attack_source,run,status,blocked_by,leaked,raw_leaked,response",
   ];
   const tally = new Map<number, { leaks: number; rawLeaks: number; total: number }>();
 
   for (const level of levels) {
-    const password = getPassword(level.id);
+    // Isolated variants borrow level 1's password: they are level 1 plus one defense.
+    const password = getPassword(level.id > 100 ? 1 : level.id);
     for (const attack of attacks) {
       for (let run = 1; run <= RUNS; run++) {
         const r = await runPipeline(level, password, attack.text);
         rows.push(
           [
-            "stacked",
+            suite,
             level.id,
             csvEscape(level.name),
             attack.id,
