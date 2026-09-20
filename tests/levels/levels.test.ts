@@ -2,8 +2,28 @@ import { describe, it, expect } from "vitest";
 import { LEVELS, getLevel, configHash, PUBLIC_LEVELS } from "@/levels";
 
 describe("levels", () => {
-  it("defines levels 1 through 6 in order", () => {
-    expect(LEVELS.map((l) => l.id)).toEqual([1, 2, 3, 4, 5, 6]);
+  it("defines levels 1 through 8 in order", () => {
+    expect(LEVELS.map((l) => l.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+  });
+
+  it("level 7 runs the shield between the regex guard and the output filter", () => {
+    expect(getLevel(7)!.guards.map((g) => g.name)).toEqual([
+      "regex-input", "prompt-shield", "output-filter",
+    ]);
+  });
+
+  it("level 8 adds the critic last, after the output filter", () => {
+    expect(getLevel(8)!.guards.map((g) => g.name)).toEqual([
+      "regex-input", "prompt-shield", "output-filter", "critic",
+    ]);
+  });
+
+  it("the two AI levels are the only ones that call the model for defense", () => {
+    const aiGuards = ["prompt-shield", "critic"];
+    for (const level of LEVELS) {
+      const usesAi = level.guards.some((g) => aiGuards.includes(g.name));
+      expect(usesAi).toBe(level.id >= 7);
+    }
   });
 
   it("level 1 has no guards", () => {
@@ -18,11 +38,18 @@ describe("levels", () => {
     expect(getLevel(3)!.guards.map((g) => g.name)).toEqual(["regex-input", "output-filter"]);
   });
 
-  it("levels stack: every level keeps the previous level's guards", () => {
+  it("levels stack: every level keeps every guard from the level below it", () => {
     for (let i = 1; i < LEVELS.length; i++) {
       const prev = LEVELS[i - 1].guards.map((g) => g.name);
       const curr = LEVELS[i].guards.map((g) => g.name);
-      expect(curr.slice(0, prev.length)).toEqual(prev);
+      expect(curr).toEqual(expect.arrayContaining(prev));
+    }
+  });
+
+  it("every level runs its input guards before its output guards", () => {
+    for (const level of LEVELS) {
+      const stages = level.guards.map((g) => g.stage);
+      expect(stages).toEqual([...stages].sort((a, b) => (a === b ? 0 : a === "input" ? -1 : 1)));
     }
   });
 

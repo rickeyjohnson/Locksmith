@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 import type { Guard } from "@/guards/types";
 import { regexInputGuard, DEFAULT_BLOCKED_PATTERNS } from "@/guards/regexInput";
 import { outputFilterGuard } from "@/guards/outputFilter";
+import { promptShieldGuard } from "@/guards/promptShield";
+import { criticGuard } from "@/guards/critic";
 import { config } from "@/config";
 
 export interface LevelConfig {
@@ -72,7 +74,7 @@ export const LEVELS: LevelConfig[] = [
     name: "The Sieve",
     blurb: "Whatever the guardian says is checked on the way out.",
     defenseSummary:
-      "Non-AI output string filter added. Responses containing the password (plain, spaced, or reversed) are replaced with a refusal.",
+      "Non-AI output string filter added. Any response containing the password as a literal string is replaced with a refusal — but a spelled-out or encoded rendering slips past it.",
     systemPrompt: BASE,
     guards: [regexInputGuard(DEFAULT_BLOCKED_PATTERNS), outputFilterGuard()],
     blockMessage: BLOCK,
@@ -106,6 +108,37 @@ export const LEVELS: LevelConfig[] = [
     systemPrompt: SPOTLIT,
     wrapUserPrompt: datamark,
     guards: [regexInputGuard(DEFAULT_BLOCKED_PATTERNS), outputFilterGuard()],
+    blockMessage: BLOCK,
+  },
+  {
+    id: 7,
+    name: "The Warden",
+    blurb: "Something reads your message before the guardian does.",
+    defenseSummary:
+      "AI prompt shield: a separate model call classifies your message as INJECTION or SAFE and blocks it before the guardian ever sees it.",
+    systemPrompt: SPOTLIT,
+    wrapUserPrompt: datamark,
+    guards: [
+      regexInputGuard(DEFAULT_BLOCKED_PATTERNS),
+      promptShieldGuard(),
+      outputFilterGuard(),
+    ],
+    blockMessage: BLOCK,
+  },
+  {
+    id: 8,
+    name: "The Auditor",
+    blurb: "Every word the guardian speaks is reviewed before you hear it.",
+    defenseSummary:
+      "AI critic agent: a second model call reviews the guardian's reply for direct or indirect leakage — hints, riddles, acrostics, encodings — and blocks it.",
+    systemPrompt: SPOTLIT,
+    wrapUserPrompt: datamark,
+    guards: [
+      regexInputGuard(DEFAULT_BLOCKED_PATTERNS),
+      promptShieldGuard(),
+      outputFilterGuard(),
+      criticGuard(),
+    ],
     blockMessage: BLOCK,
   },
 ];
