@@ -21,7 +21,7 @@ cp "$REPO/README.md" "$STAGE/README.md"
 
 # 2. The written report
 cp "$REPO/docs/checkpoint1/COMP365_CP1_Report_Rickey_Johnson.docx" "$STAGE/report/"
-[ -f "$REPO/docs/checkpoint1/report.pdf" ] && cp "$REPO/docs/checkpoint1/report.pdf" "$STAGE/report/"
+cp "$REPO"/docs/checkpoint1/*.pdf "$STAGE/report/" 2>/dev/null || true
 
 # 3. Results: the summary tables and the full raw CSVs behind them
 cp "$REPO"/docs/results/*.csv "$STAGE/results/"
