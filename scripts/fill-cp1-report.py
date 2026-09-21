@@ -5,8 +5,49 @@ Usage:
 
 Only the gray placeholder cells are replaced; the template's structure is untouched.
 """
+import re
 import sys
 from docx import Document
+from docx.opc.constants import RELATIONSHIP_TYPE as RT
+from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
+
+URL_RE = re.compile(r"https?://[^\s,;)]+")
+
+
+def add_hyperlink(paragraph, url, text):
+    """python-docx has no hyperlink API: add the relationship and the w:hyperlink run."""
+    part = paragraph.part
+    r_id = part.relate_to(url, RT.HYPERLINK, is_external=True)
+    link = OxmlElement("w:hyperlink")
+    link.set(qn("r:id"), r_id)
+    run = OxmlElement("w:r")
+    props = OxmlElement("w:rPr")
+    color = OxmlElement("w:color")
+    color.set(qn("w:val"), "0563C1")
+    underline = OxmlElement("w:u")
+    underline.set(qn("w:val"), "single")
+    props.append(color)
+    props.append(underline)
+    run.append(props)
+    text_el = OxmlElement("w:t")
+    text_el.text = text
+    run.append(text_el)
+    link.append(run)
+    paragraph._p.append(link)
+
+
+def write_with_links(paragraph, text):
+    """Write text into an empty paragraph, turning any URLs into real hyperlinks."""
+    pos = 0
+    for match in URL_RE.finditer(text):
+        if match.start() > pos:
+            paragraph.add_run(text[pos:match.start()])
+        add_hyperlink(paragraph, match.group(), match.group())
+        pos = match.end()
+    if pos < len(text):
+        paragraph.add_run(text[pos:])
+
 
 REPO = "https://github.com/rickeyjohnson/Locksmith"
 
@@ -110,14 +151,14 @@ CELLS = {
 
 
 def set_cell(cell, text):
-    """Replace a cell's text while keeping its first run's formatting."""
+    """Replace a cell's text, keeping its formatting and linkifying any URLs."""
     paragraph = cell.paragraphs[0]
     for extra in cell.paragraphs[1:]:
         extra._element.getparent().remove(extra._element)
-    if paragraph.runs:
-        paragraph.runs[0].text = text
-        for run in paragraph.runs[1:]:
-            run._element.getparent().remove(run._element)
+    for run in list(paragraph.runs):
+        run._element.getparent().remove(run._element)
+    if URL_RE.search(text):
+        write_with_links(paragraph, text)
     else:
         paragraph.add_run(text)
 
