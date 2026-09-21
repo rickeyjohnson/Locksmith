@@ -19,29 +19,47 @@ export function LevelScreen({
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState("");
 
+  /**
+   * A server error does not return JSON, so parsing has to be guarded — otherwise the
+   * throw escapes and leaves the screen stuck on "thinking…" with no way to recover.
+   */
+  async function post(path: string, body: unknown): Promise<Record<string, unknown>> {
+    try {
+      const res = await fetch(path, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      return (await res.json()) as Record<string, unknown>;
+    } catch {
+      return { error: "Something went wrong reaching the vault. Try again in a moment." };
+    }
+  }
+
   async function send() {
     if (!prompt.trim() || busy) return;
     setBusy(true);
     setNote("");
-    const res = await fetch("/api/attempt", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ levelId: level.id, prompt }),
-    }).then((r) => r.json());
-    if (res.error) setNote(res.error);
-    else setTurns((t) => [...t, { you: prompt, guardian: res.response, blocked: res.blocked }]);
-    setPrompt("");
-    setBusy(false);
+    try {
+      const res = await post("/api/attempt", { levelId: level.id, prompt });
+      if (res.error) setNote(String(res.error));
+      else {
+        setTurns((t) => [
+          ...t,
+          { you: prompt, guardian: String(res.response), blocked: Boolean(res.blocked) },
+        ]);
+        setPrompt("");
+      }
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function submitGuess() {
     if (!guess.trim()) return;
-    const res = await fetch("/api/guess", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ levelId: level.id, guess }),
-    }).then((r) => r.json());
-    if (res.correct) onSolved(res.defenseSummary);
+    const res = await post("/api/guess", { levelId: level.id, guess });
+    if (res.error) setNote(String(res.error));
+    else if (res.correct) onSolved(String(res.defenseSummary));
     else setNote("Wrong password.");
     setGuess("");
   }
