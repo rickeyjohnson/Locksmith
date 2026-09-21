@@ -27,54 +27,101 @@ attacks are measured the same way.
 
 Defenses stack: every level keeps the layers below it.
 
-## Requirements
+## What you need first
 
-- **Node.js 22+** — `node -v`
-- **Ollama** — https://ollama.com/download (runs the model locally; no API keys, no cloud)
-- About 6 GB of disk for the model, and 16 GB RAM recommended
+Everything runs on your own machine. There are no API keys and nothing is sent to the cloud.
 
-## Setup
+| | Why | Check it |
+|---|---|---|
+| **Node.js 22 or newer** | runs the game | `node -v` |
+| **Git** | to clone this repo | `git --version` |
+| **Ollama** | runs the AI model locally | `ollama --version` |
+| ~6 GB free disk, 16 GB RAM | the model is about 5 GB | — |
+
+**Installing Node.js:** download the LTS installer from https://nodejs.org, or on macOS
+`brew install node`, or on Linux use https://github.com/nvm-sh/nvm.
+
+**Installing Ollama:** download from https://ollama.com/download (macOS, Windows, and Linux).
+After installing, open the Ollama app once so its background service is running.
+
+## Setup — every command, in order
+
+**Step 1. Clone the repository and enter it.**
 
 ```bash
 git clone https://github.com/rickeyjohnson/Locksmith.git
+```
+
+```bash
 cd Locksmith
+```
+
+**Step 2. Install the project's packages** (about a minute).
+
+```bash
 npm install
 ```
 
-Pull the model (about 5 GB):
+**Step 3. Download the model** (about 5 GB, several minutes on a normal connection).
 
 ```bash
 ollama pull qwen3:8b
 ```
 
-Create your environment file and a random session secret:
+**Step 4. Create your settings file** from the template.
+
+macOS or Linux:
 
 ```bash
 cp .env.example .env.local
 ```
 
+Windows (PowerShell):
+
+```powershell
+Copy-Item .env.example .env.local
+```
+
+**Step 5. Give your install a random session secret.** This signs the cookie that identifies a
+player; the same command works on every platform.
+
 ```bash
 node -e "const c=require('crypto'),f=require('fs');f.writeFileSync('.env.local',f.readFileSync('.env.local','utf8').replace('change-me-to-a-long-random-string',c.randomBytes(32).toString('hex')))"
 ```
 
-Generate the level passwords (written to `levels.secrets.json`, which git ignores so the
-passwords never reach the repository):
+**Step 6. Generate the eight level passwords.** They are written to `levels.secrets.json`,
+which git ignores — so the passwords are yours alone and are not in this repository.
 
 ```bash
 npx tsx scripts/gen-secrets.ts
 ```
 
-## Play
+**Step 7. Start the game.**
 
 ```bash
 npm run dev
 ```
 
-Open http://localhost:3000. Accept the data notice, pick Level 1, and start talking to the
-guardian. Type the password into the guess box to unlock the next level.
+**Step 8. Open http://localhost:3000 in your browser.** Accept the data notice, pick Level 1,
+and start talking to the guardian. Type the password into the guess box to unlock the next
+level. Press Ctrl-C in the terminal to stop the game.
+
+Steps 1–6 are one-time. To play again later, just `cd Locksmith` and run `npm run dev`.
 
 The guardian answers each message independently — it does not remember earlier messages in a
 level. That keeps every attempt an independent trial for the research.
+
+## If something goes wrong
+
+| Symptom | Fix |
+|---|---|
+| "Locksmith is offline — try again during a playtest window" | Ollama isn't running or the model isn't pulled. Run `ollama list` — if `qwen3:8b` is missing, redo step 3. Open the Ollama app if it isn't running. |
+| `levels.secrets.json missing` | You skipped step 6. Run `npx tsx scripts/gen-secrets.ts`. |
+| `Cannot find module` on startup | You skipped step 2. Run `npm install`. |
+| Port 3000 already in use | `PORT=3001 npm run dev`, then open http://localhost:3001. |
+| Replies take 20–30 seconds | Normal on levels 7–8: they make three model calls. Lower `LLM_MAX_TOKENS` in `.env.local` to speed it up. |
+| Model too slow or too big for your machine | Use a smaller one: `ollama pull qwen3:4b`, then set `LLM_MODEL=qwen3:4b` in `.env.local`. Results will differ from the published ones. |
+| Levels 7–8 feel impossible | They may be. No attack in the 78-prompt benchmark got past them. |
 
 ## Run the benchmark
 
