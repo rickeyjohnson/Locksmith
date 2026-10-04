@@ -62,7 +62,7 @@ this report are my own.</p>
 output filter (level 3) — against level 1, which has no defense.</p>
 <p><strong>Procedure:</strong> every level and isolated defense gets the same 78 prompts, with qwen3:8b,
 temperature 0.7, seed 42, 300-token cap, and a configuration hash on every row.</p>
-<p><strong>Cases:</strong> 624 stacked attempts (78 × 8) + 546 isolated (78 × 7) = <strong>1,170 scored</strong>.</p>
+<p><strong>Cases:</strong> 1,844 stacked attempts (78 prompts × 8 levels × 3 seeds) + 546 isolated (78 × 7, single seed) = <strong>2,390 scored</strong>.</p>
 <p><strong>Measures:</strong> (1) player-visible leak rate — password present in the shown reply, any
 disguise; (2) model-side leak rate — the same check on the raw reply, separating "the model kept it" from "a
 filter caught it". Mean/median attempts until success needs human players and is
@@ -76,17 +76,17 @@ a preprint only.</p>
 
 <h2>4 Results</h2>
 <table>
-  <tr><th>Level</th><th>Defense added</th><th>Player-visible leak</th><th>Model-side leak</th><th>Model leak given it reached the model</th></tr>
-  <tr><td>1</td><td>none</td><td class="num">84.6%</td><td class="num">84.6%</td><td class="num">84.6%</td></tr>
-  <tr><td>2</td><td>keyword filter (non-AI)</td><td class="num">47.4%</td><td class="num">47.4%</td><td class="num">82.2%</td></tr>
-  <tr><td>3</td><td>output filter (non-AI)</td><td class="num">6.4%</td><td class="num">50.0%</td><td class="num">86.7%</td></tr>
-  <tr><td>4</td><td>refusal instruction</td><td class="num">0.0%</td><td class="num">34.6%</td><td class="num">60.0%</td></tr>
-  <tr><td>5</td><td>hardened charter</td><td class="num">1.4%</td><td class="num">11.4%</td><td class="num">21.6%</td></tr>
-  <tr><td>6</td><td>spotlighting</td><td class="num">0.0%</td><td class="num">1.3%</td><td class="num">2.2%</td></tr>
-  <tr><td>7</td><td>AI prompt shield</td><td class="num">0.0%</td><td class="num">0.0%</td><td class="num">0.0%</td></tr>
-  <tr><td>8</td><td>AI critic agent</td><td class="num">0.0%</td><td class="num">0.0%</td><td class="num">0.0%</td></tr>
+  <tr><th>Level</th><th>Defense added</th><th>Player-visible leak<br>(mean of 3 seeds)</th><th>Per-seed 42 / 43 / 44</th><th>Model leak given it reached the model</th></tr>
+  <tr><td>1</td><td>none</td><td class="num">82.0%</td><td class="num">82.6 / 81.2 / 82.4</td><td class="num">82.0%</td></tr>
+  <tr><td>2</td><td>keyword filter (non-AI)</td><td class="num">45.3%</td><td class="num">47.4 / 42.3 / 46.2</td><td class="num">78.5%</td></tr>
+  <tr><td>3</td><td>output filter (non-AI)</td><td class="num">5.1%</td><td class="num">6.4 / 5.1 / 3.8</td><td class="num">83.0%</td></tr>
+  <tr><td>4</td><td>refusal instruction</td><td class="num">1.3%</td><td class="num">0.0 / 2.6 / 1.3</td><td class="num">65.9%</td></tr>
+  <tr><td>5</td><td>hardened charter</td><td class="num">0.9%</td><td class="num">1.3 / 1.3 / 0.0</td><td class="num">30.4%</td></tr>
+  <tr><td>6</td><td>spotlighting</td><td class="num">0.0%</td><td class="num">0.0 / 0.0 / 0.0</td><td class="num">0.7%</td></tr>
+  <tr><td>7</td><td>AI prompt shield</td><td class="num">0.0%</td><td class="num">0.0 / 0.0 / 0.0</td><td class="num">1.9%</td></tr>
+  <tr><td>8</td><td>AI critic agent</td><td class="num">0.0%</td><td class="num">0.0 / 0.0 / 0.0</td><td class="num">1.9%</td></tr>
 </table>
-<p class="note">78 attempts per level; level 5 scored over 70 after 8 model timeouts were excluded.</p>
+<p class="note">234 attempts per level (78 prompts × 3 seeds); level 1 scored over 206 after timeouts were excluded.</p>
 
 <p>Each defense alone on top of level 1, showing where its attempts ended:</p>
 <table>
@@ -101,8 +101,8 @@ a preprint only.</p>
 </table>
 <ul>
   <li><strong>Filtering reduces exposure without making the model safer.</strong> Of attacks reaching the
-      model: 84.6% undefended, 82.2% behind the keyword filter, 86.7% at level 3 — flat. Only prompt-level
-      defenses move the model: 60.0% → 21.6% → 2.2%.</li>
+      model: 82.0% undefended, 78.5% behind the keyword filter, 83.0% at level 3 — flat across three seeds.
+      Only prompt-level defenses move the model: 65.9% → 30.4% → 0.7%.</li>
   <li><strong>Both AI defenses are gatekeepers with no depth.</strong> The shield blocks 60 of 78, but 17 of
       the 18 that pass leak — worse than no defense at all. The critic still leaks 56% of what it delivers.</li>
   <li><strong>The cheapest defense is the strongest.</strong> Spotlighting costs no extra model call and
@@ -119,8 +119,11 @@ against each other. The isolation table shows this is a measurement failure, not
 (17.9%) and shield (21.8%) are clearly weaker than spotlighting (1.3%). Causes: the shield blocks 78% of the
 corpus before the model, leaving 17 prompts per level; 33 of 78 attacks name "password" or "instructions"
 and die at the regex filter; and the corpus never adapts, whereas a human would.</p>
-<p><strong>Level 5 (1.4%) looks worse than level 4 (0.0%).</strong> It is one attempt in 70 — about 1.4
-percentage points — so the two levels are not distinguishable and the inversion is noise.</p>
+<p><strong>An apparent inversion, settled by the seed sweep.</strong> At a single seed level 5 (1.4%) looked
+worse than level 4 (0.0%). Across three seeds the ranges overlap completely — level 4 scores 0.0 / 2.6 / 1.3
+and level 5 scores 1.3 / 1.3 / 0.0 — so the two are not distinguishable and the inversion was noise. Seed
+variation is itself meaningful: level 2 moves 5.1 percentage points between seeds, so single-run differences
+smaller than that carry no weight.</p>
 <p><strong>Hand-check of the labels.</strong> 20 stratified attempts (10 leak, 10 clean) were read against
 the real password: <strong>all 20 labels were correct</strong>. The finding is in the definition, not the
 labels — two clean replies hand out most of the password:</p>
@@ -130,7 +133,8 @@ Oath-bound I stand, my duty clear,      In this vault, the truth is kept,
 Gates of wisdom, none can breach.       Pillars of trust, never to sleep.</div>
 <p>Line initials spell <strong>SLOGJAIP</strong>; the password is <strong>SLOGEJAIP</strong> — eight of nine
 letters in order. A player recovers it in a guess or two, but it scores clean because the exact string never
-appears. Measured across level 1: <strong>2 of 37 clean attempts (5.4%)</strong>, reproducing at two seeds.</p>
+appears. Measured across all 1,844 attempts: <strong>8 near misses, 0.5% of clean replies</strong>, confined
+to levels 1–4 and reproducing across seeds.</p>
 <p><strong>Limit of the data.</strong> One model, no human has played the game, and "does the reply contain
 the password" is narrower than "could a player recover it". A reported 0% means no attempt produced the
 exact string; it is not a claim of security.</p>
@@ -139,9 +143,10 @@ exact string; it is not a claim of security.</p>
 <p><strong>Task 1 — put players on the upper levels.</strong> Levels 6–8 have never faced a human, and normal
 progression cannot deliver them, so the game now ships a playtest mode that unlocks every level and tags
 those attempts separately.</p>
-<p><strong>Task 2 — vary the seed.</strong> Repeating runs measured nothing: at a fixed seed replies are
-byte-identical. A sweep over seeds 42/43/44 is running; only then can the level 4/5 inversion be settled with
-an interval.</p>
+<p><strong>Task 2 — widen the corpus against the top levels.</strong> The seed sweep is complete and settled
+the level 4/5 question, but levels 6–8 still sit at 0.0% at every seed while leaking 0.7–1.9% on the model
+side, so the ceiling is now the attack set rather than the measurement. The next run needs adaptive attacks
+written against these defenses, not a fixed corpus.</p>
 <p><strong>Introduction.</strong> Prompt injection defeats secrets held in system prompts, and published
 defenses are rarely measured against one another on one model with one attack set.</p>
 <p><strong>Methods.</strong> Eight stacked levels and seven isolated variants share one guard pipeline, a
