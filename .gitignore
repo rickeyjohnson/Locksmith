@@ -45,3 +45,6 @@ levels.secrets.json
 .env.local
 /data/
 /results/
+
+# built submission bundles (regenerate with scripts/make-submission.sh)
+/submission/
