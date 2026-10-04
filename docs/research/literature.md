@@ -13,6 +13,67 @@ that what lands in your bibliography is something you actually read.
 
 ---
 
+## 0. Peer-review status at a glance
+
+Checkpoint 1 feedback asked for published, peer-reviewed work to confirm the gap this project
+addresses. Each source below is marked with where it was actually published, because several
+widely-cited prompt-injection papers exist only as preprints and should not be leaned on alone.
+
+| Source | Venue | Peer reviewed |
+|---|---|---|
+| Toyer et al., *Tensor Trust* | ICLR 2024 | **Yes** |
+| Liu et al., *Formalizing and Benchmarking…* | USENIX Security 2024 | **Yes** |
+| Schulhoff et al., *HackAPrompt* | EMNLP 2023 | **Yes** |
+| Greshake et al., *Not what you've signed up for* | AISec '23 workshop @ ACM CCS, pp. 79–90 | **Yes** |
+| Chen et al., *StruQ* | USENIX Security 2025 | **Yes** |
+| Chen et al., *SecAlign* | ACM CCS 2025 | **Yes** |
+| Liu et al., *DataSentinel* | IEEE S&P 2025 (Distinguished Paper) | **Yes** |
+| Perez & Ribeiro, *Ignore Previous Prompt* | NeurIPS 2022 ML Safety **workshop** | Workshop only |
+| Hines et al., *Spotlighting* | arXiv only | **No** |
+| Pfister et al., *Gandalf the Red* | arXiv only | **No** |
+| Wallace et al., *Instruction Hierarchy* | arXiv only | **No** |
+| Debenedetti et al., *CaMeL* | arXiv only | **No** |
+
+Two consequences for how this project writes itself up. First, **spotlighting — the strongest
+defense measured here — has not been peer reviewed**, so this project's measurement of it is
+a contribution rather than a confirmation. Second, the two gamified datasets closest to
+Locksmith split on review status: Tensor Trust is ICLR, Gandalf is a preprint.
+
+## 0.1 The peer-reviewed defenses this project does *not* implement
+
+These matter for positioning: the published state of the art defends by changing the model or
+its interface, not by writing a better prompt. Locksmith measures the prompt-level defenses a
+developer can apply without retraining, which is the gap.
+
+### Chen et al. 2025 — *StruQ: Defending Against Prompt Injection with Structured Queries*
+USENIX Security 2025. arXiv:2402.06363 — https://arxiv.org/abs/2402.06363
+- Separates the prompt channel from the data channel with a secure front end, then fine-tunes
+  the model to follow instructions only from the prompt channel. Reports strong resistance with
+  little utility loss.
+- **Position against it:** this needs fine-tuning and a changed interface. Locksmith's levels 1–6
+  are what is available to someone who can only edit a system prompt.
+
+### Chen et al. 2025 — *SecAlign: Defending Against Prompt Injection with Preference Optimization*
+ACM CCS 2025 — https://dl.acm.org/doi/abs/10.1145/3719027.3744836
+- Builds a preference dataset pairing secure and insecure responses to injected inputs and
+  trains the model to prefer the secure one.
+- **Position against it:** again a training-time defense; cite it as the direction prompt-level
+  defenses are ultimately losing to.
+
+### Liu et al. 2025 — *DataSentinel: A Game-Theoretic Detection of Prompt Injection Attacks*
+IEEE S&P 2025, Distinguished Paper. arXiv:2504.11358 — https://arxiv.org/abs/2504.11358
+- Fine-tunes a detector LLM against *adaptive* attacks that are strategically adapted to evade it.
+- **Position against it:** this is the peer-reviewed version of Locksmith's level 7 prompt shield.
+  Their detector is trained and adaptive; ours is an untrained classifier prompt, and the
+  measured result — it blocks 77% at the gate but 94% of what slips past leaks — is the
+  quantified cost of the untrained version.
+
+### Greshake et al. 2023 — venue correction
+*Not what you've signed up for* was published at the **AISec '23 workshop co-located with ACM
+CCS**, pages 79–90 — cite the workshop, not the preprint.
+
+---
+
 ## 1. The attack itself
 
 ### Perez & Ribeiro 2022 — *Ignore Previous Prompt: Attack Techniques For Language Models*
@@ -174,13 +235,6 @@ produced it in 29.2% of attempts behind the output filter.
   archivePrefix = {arXiv}
 }
 
-@article{greshake2023not,
-  title   = {Not what you've signed up for: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection},
-  author  = {Greshake, Kai and Abdelnabi, Sahar and Mishra, Shailesh and Endres, Christoph and Holz, Thorsten and Fritz, Mario},
-  journal = {arXiv preprint arXiv:2302.12173},
-  year    = {2023}
-}
-
 @inproceedings{liu2024formalizing,
   title     = {Formalizing and Benchmarking Prompt Injection Attacks and Defenses},
   author    = {Liu, Yupei and Jia, Yuqi and Geng, Runpeng and Jia, Jinyuan and Gong, Neil Zhenqiang},
@@ -223,6 +277,35 @@ produced it in 29.2% of attempts behind the output filter.
   author    = {Schulhoff, Sander and Pinto, Jeremy and Khan, Anaum and Bouchard, Louis-Fran{\c{c}}ois and Si, Chenglei and Anati, Svetlina and Tagliabue, Valen and Kost, Anson Liu and Carnahan, Christopher and Boyd-Graber, Jordan},
   booktitle = {Proceedings of EMNLP 2023},
   year      = {2023}
+}
+
+@inproceedings{greshake2023aisec,
+  title     = {Not What You've Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection},
+  author    = {Greshake, Kai and Abdelnabi, Sahar and Mishra, Shailesh and Endres, Christoph and Holz, Thorsten and Fritz, Mario},
+  booktitle = {Proceedings of the 16th ACM Workshop on Artificial Intelligence and Security (AISec '23)},
+  pages     = {79--90},
+  year      = {2023}
+}
+
+@inproceedings{chen2025struq,
+  title     = {StruQ: Defending Against Prompt Injection with Structured Queries},
+  author    = {Chen, Sizhe and Piet, Julien and Sitawarin, Chawin and Wagner, David},
+  booktitle = {34th USENIX Security Symposium},
+  year      = {2025}
+}
+
+@inproceedings{chen2025secalign,
+  title     = {SecAlign: Defending Against Prompt Injection with Preference Optimization},
+  author    = {Chen, Sizhe and Zharmagambetov, Arman and Mahloujifar, Saeed and Chaudhuri, Kamalika and Wagner, David and Guo, Chuan},
+  booktitle = {Proceedings of the 2025 ACM SIGSAC Conference on Computer and Communications Security (CCS)},
+  year      = {2025}
+}
+
+@inproceedings{liu2025datasentinel,
+  title     = {DataSentinel: A Game-Theoretic Detection of Prompt Injection Attacks},
+  author    = {Liu, Yupei and Jia, Yuqi and Jia, Jinyuan and Song, Dawn and Gong, Neil Zhenqiang},
+  booktitle = {IEEE Symposium on Security and Privacy (S\&P)},
+  year      = {2025}
 }
 
 @article{debenedetti2025camel,
