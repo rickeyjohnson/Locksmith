@@ -55,6 +55,7 @@ export async function POST(req: Request) {
     latencyMs: result.latencyMs,
     model: config.llmModel,
     configHash: result.configHash,
+    mode: config.playtestUnlockAll ? "free" : "progression",
     createdAt: new Date().toISOString(),
   });
 

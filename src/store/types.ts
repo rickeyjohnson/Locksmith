@@ -14,6 +14,7 @@ export interface AttemptRecord {
   latencyMs: number;
   model: string;
   configHash: string;
+  mode: "progression" | "free";
   createdAt: string;
 }
 
@@ -24,6 +25,7 @@ export interface GuessRecord {
   guess: string;
   correct: boolean;
   attemptsBefore: number;
+  mode: "progression" | "free";
   createdAt: string;
 }
 

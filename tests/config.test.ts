@@ -20,3 +20,31 @@ describe("config", () => {
     expect(loadConfig().llmModel).toBe("qwen3:8b");
   });
 });
+
+describe("seed is read live", () => {
+  it("picks up a seed change after the config object was built", async () => {
+    process.env.LLM_SEED = "42";
+    const { loadConfig } = await import("@/config");
+    const cfg = loadConfig();
+    expect(cfg.seed).toBe(42);
+    process.env.LLM_SEED = "43";
+    expect(cfg.seed).toBe(43); // a frozen value would still read 42
+  });
+});
+
+describe("playtest unlock", () => {
+  it("is off unless the env var is exactly 'true'", async () => {
+    delete process.env.PLAYTEST_UNLOCK_ALL;
+    const { loadConfig } = await import("@/config");
+    expect(loadConfig().playtestUnlockAll).toBe(false);
+    process.env.PLAYTEST_UNLOCK_ALL = "yes";
+    expect(loadConfig().playtestUnlockAll).toBe(false);
+  });
+
+  it("turns on when set", async () => {
+    process.env.PLAYTEST_UNLOCK_ALL = "true";
+    const { loadConfig } = await import("@/config");
+    expect(loadConfig().playtestUnlockAll).toBe(true);
+    delete process.env.PLAYTEST_UNLOCK_ALL;
+  });
+});

@@ -34,7 +34,7 @@ describe("jsonlStore", () => {
       id: "1", playerId: "p1", levelId: 1, attemptNo: 1, prompt: "a",
       rawModelResponse: null, shownResponse: "x", status: "ok", blockedBy: null,
       guardTrace: [], leaked: false, rawLeaked: false, latencyMs: 1, model: "m",
-      configHash: "h", createdAt: new Date().toISOString(),
+      configHash: "h", mode: "progression", createdAt: new Date().toISOString(),
     });
     expect(await store.countAttempts("p1", 1)).toBe(1);
     expect(await store.countAttempts("p1", 2)).toBe(0);
@@ -44,11 +44,11 @@ describe("jsonlStore", () => {
   it("lists solved levels from correct guesses only", async () => {
     await store.saveGuess({
       id: "g1", playerId: "p1", levelId: 1, guess: "wrong", correct: false,
-      attemptsBefore: 1, createdAt: new Date().toISOString(),
+      attemptsBefore: 1, mode: "progression", createdAt: new Date().toISOString(),
     });
     await store.saveGuess({
       id: "g2", playerId: "p1", levelId: 1, guess: "right", correct: true,
-      attemptsBefore: 2, createdAt: new Date().toISOString(),
+      attemptsBefore: 2, mode: "progression", createdAt: new Date().toISOString(),
     });
     expect(await store.solvedLevels("p1")).toEqual([1]);
   });

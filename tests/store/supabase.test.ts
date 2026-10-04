@@ -34,6 +34,7 @@ const attempt = {
   latencyMs: 12,
   model: "qwen3:8b",
   configHash: "abc",
+  mode: "progression" as const,
   createdAt: "2026-09-25T00:00:00.000Z",
 };
 
@@ -57,6 +58,7 @@ describe("supabaseStore", () => {
       latency_ms: 12,
       model: "qwen3:8b",
       config_hash: "abc",
+      mode: "progression",
       created_at: "2026-09-25T00:00:00.000Z",
     });
   });
@@ -79,6 +81,7 @@ describe("supabaseStore", () => {
       guess: "x",
       correct: true,
       attemptsBefore: 4,
+      mode: "progression",
       createdAt: "2026-09-25T00:00:00.000Z",
     });
     expect(inserted.guesses[0]).toMatchObject({
@@ -100,6 +103,7 @@ describe("supabaseStore", () => {
         guess: "x",
         correct: false,
         attemptsBefore: 0,
+        mode: "progression",
         createdAt: "2026-09-25T00:00:00.000Z",
       }),
     ).rejects.toThrow(/nope/);

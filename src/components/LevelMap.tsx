@@ -6,18 +6,25 @@ export function LevelMap({
   levels,
   solved,
   onPick,
+  unlockAll = false,
 }: {
   levels: PublicLevel[];
   solved: number[];
   onPick: (id: number) => void;
+  unlockAll?: boolean;
 }) {
   const highestUnlocked = solved.length ? Math.max(...solved) + 1 : 1;
   return (
     <div className="mx-auto max-w-2xl space-y-3 p-8">
       <h2 className="text-2xl font-bold">Choose a lock</h2>
+      {unlockAll && (
+        <p className="rounded border border-amber-500/50 bg-amber-500/10 p-2 text-sm">
+          Playtest mode: every level is open, so the hardest defenses can be tried directly.
+        </p>
+      )}
       {levels.map((level) => {
         const isSolved = solved.includes(level.id);
-        const locked = level.id > highestUnlocked;
+        const locked = !unlockAll && level.id > highestUnlocked;
         return (
           <button
             key={level.id}

@@ -4,6 +4,7 @@ import { getLevel } from "@/levels";
 import { getPassword } from "@/levels/secrets";
 import { verifyPlayerId } from "@/session";
 import { getStore } from "@/store";
+import { config } from "@/config";
 
 export async function POST(req: Request) {
   const cookie = req.headers.get("cookie")?.match(/ls_pid=([^;]+)/)?.[1];
@@ -27,6 +28,7 @@ export async function POST(req: Request) {
     guess,
     correct,
     attemptsBefore,
+    mode: config.playtestUnlockAll ? "free" : "progression",
     createdAt: new Date().toISOString(),
   });
 

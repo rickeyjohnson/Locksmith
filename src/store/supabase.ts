@@ -30,6 +30,7 @@ export function supabaseStore(url: string, serviceKey: string, injected?: Supaba
         latency_ms: a.latencyMs,
         model: a.model,
         config_hash: a.configHash,
+        mode: a.mode,
         created_at: a.createdAt,
       });
       check(error);
@@ -43,6 +44,7 @@ export function supabaseStore(url: string, serviceKey: string, injected?: Supaba
         guess: g.guess,
         correct: g.correct,
         attempts_before: g.attemptsBefore,
+        mode: g.mode,
         created_at: g.createdAt,
       });
       check(error);

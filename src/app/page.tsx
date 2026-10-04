@@ -7,6 +7,7 @@ import { LevelScreen } from "@/components/LevelScreen";
 export default function Home() {
   const [levels, setLevels] = useState<PublicLevel[] | null>(null);
   const [solved, setSolved] = useState<number[]>([]);
+  const [unlockAll, setUnlockAll] = useState(false);
   const [current, setCurrent] = useState<PublicLevel | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
 
@@ -18,6 +19,7 @@ export default function Home() {
     }).then((r) => r.json());
     setLevels(data.levels);
     setSolved(data.solved);
+    setUnlockAll(Boolean(data.unlockAll));
   }
 
   if (!levels) return <Consent onStart={start} />;
@@ -59,6 +61,7 @@ export default function Home() {
     <LevelMap
       levels={levels}
       solved={solved}
+      unlockAll={unlockAll}
       onPick={(id) => setCurrent(levels.find((l) => l.id === id)!)}
     />
   );

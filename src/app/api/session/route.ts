@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { PUBLIC_LEVELS } from "@/levels";
 import { COOKIE_NAME, newPlayerId, signPlayerId, verifyPlayerId } from "@/session";
 import { getStore } from "@/store";
+import { config } from "@/config";
 
 export async function POST(req: Request) {
   const cookie = req.headers.get("cookie")?.match(/ls_pid=([^;]+)/)?.[1];
@@ -13,6 +14,7 @@ export async function POST(req: Request) {
     playerId,
     levels: PUBLIC_LEVELS,
     solved: await store.solvedLevels(playerId),
+    unlockAll: config.playtestUnlockAll,
   });
   res.cookies.set(COOKIE_NAME, signPlayerId(playerId), {
     httpOnly: true,
