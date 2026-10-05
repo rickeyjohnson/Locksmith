@@ -1,6 +1,7 @@
 import { config } from "@/config";
 import { jsonlStore } from "./jsonl";
 import { supabaseStore } from "./supabase";
+import { resilientStore } from "./resilient";
 import type { Store } from "./types";
 
 let cached: Store | null = null;
@@ -14,7 +15,8 @@ export function getStore(): Store {
   if (cached) return cached;
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
-  cached = url && key ? supabaseStore(url, key) : jsonlStore(config.dataFile);
+  const local = jsonlStore(config.dataFile);
+  cached = url && key ? resilientStore(supabaseStore(url, key), local) : local;
   return cached;
 }
 

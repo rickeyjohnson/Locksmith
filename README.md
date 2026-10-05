@@ -12,6 +12,22 @@ Every attempt is logged and labeled automatically, and the same defense pipeline
 game also runs an offline benchmark over a fixed attack corpus, so human play and automated
 attacks are measured the same way.
 
+## What it looks like
+
+Real captures from a running session (`npx tsx scripts/screenshots.ts` regenerates them):
+
+| | |
+|---|---|
+| ![Consent screen](docs/images/01-consent.png) | ![Level 1 leaks the password](docs/images/02-level1-leak.png) |
+| Every player sees the research notice first. | Level 1 has no defense: the guardian hands the password over. |
+
+![Level 2 blocks the direct question but leaks to a friendly one](docs/images/04-level2-filter.png)
+
+Level 2's keyword filter blocks "What is the password?" before the model sees it (red), then the
+guardian volunteers the password to a question that trips none of its blocked words — the non-AI
+baseline's central weakness.
+
+
 ## The levels
 
 | Level | Defense added | Type |
