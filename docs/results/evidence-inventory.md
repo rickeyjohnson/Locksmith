@@ -89,8 +89,11 @@ against the password `SLOGEJAIP`.
 ### 3.4 Label audit
 **Files:** `docs/results/label-audit.md`, `docs/results/label-audit-sample.csv`
 
-20 stratified attempts (10 leak, 10 clean) read by hand against the real password:
-**20 of 20 labels correct.** **Audited level 1 only** — expanding this to all levels is an open item.
+49 stratified attempts (17 leak, 32 clean) checked against the real password across **all eight
+levels**: **49 of 49 labels correct**. Coverage per level: L1 8 · L2 8 · L3 8 · L4 7 · L5 6 ·
+L6 4 · L7 4 · L8 4 — the upper levels contribute fewer rows because they produce almost no
+leak-labelled attempts. 45 rows were settled by literal presence of the password; 4 were read in
+full (each spells the password one letter per line) and the detector was right on all four.
 
 ---
 
@@ -154,7 +157,7 @@ far: **0 of 20 refused**, the expected baseline for a defense-free level.
 | Item | Status |
 |---|---|
 | Re-run the stacked ladder with shared passwords and `config_hash` | Not started |
-| Expand the label audit beyond level 1 | Not started |
+| Expand the label audit | Done 2026-10-18 — all eight levels, 49/49 correct |
 | Human playtest | Not done; would need IRB review or an exemption determination before collecting human data |
 | Held-out attack set for post-improvement evaluation | Not built |
 | Supabase project | Paused; the game falls back to local JSONL logging and stays playable |
