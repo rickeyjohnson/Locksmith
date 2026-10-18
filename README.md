@@ -202,6 +202,12 @@ npx tsx scripts/analyze.ts
 
 Changing any of these makes your numbers incomparable to the results in `docs/results/`.
 
+## Reproducing the published results
+
+[REPRODUCE.md](REPRODUCE.md) lists the exact versions, hardware, model settings and commands
+behind every number in the paper, plus the limitations of these materials and a disclosure of
+AI assistance.
+
 ## Results and write-up
 
 - `docs/results/` — leak rates per level, the isolated-defense ranking, and the raw CSVs

@@ -1,0 +1,95 @@
+% ICSE 2027 ACM Student Research Competition
+% Format required by the track: IEEE conference template, 10pt, conference option,
+% WITHOUT compsoc. Review is single-blind, so author name and affiliation are included.
+% Length: abstract <= 800 words, 2 pages including figures/tables/appendices,
+% plus one additional page for references only.
+%
+% This file is scaffolding: document class, required packages, and the section
+% headings the assignment requires. All prose is yours to write.
+
+\documentclass[10pt,conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+\begin{document}
+
+\title{TITLE GOES HERE}
+
+\author{\IEEEauthorblockN{Rickey Johnson}
+\IEEEauthorblockA{\textit{Department of Computer Science} \\
+\textit{North Carolina A\&T State University}\\
+Greensboro, NC, USA \\
+EMAIL GOES HERE}
+}
+
+\maketitle
+
+\begin{abstract}
+ABSTRACT GOES HERE.
+\end{abstract}
+
+\begin{IEEEkeywords}
+KEYWORDS GO HERE
+\end{IEEEkeywords}
+
+\section{Introduction}
+% Required content (from the assignment): background and motivation; the research
+% question(s) and approach; what you built and your specific contributions; the AI/ML
+% task addressed; and a clear separation between your work and the models and tools you
+% used.
+
+\section{Related Work}
+% Required content: similar work, including work that takes a different approach or
+% reports conflicting findings; how this project builds on it or addresses a gap; cited
+% sources you have read and verified; peer-reviewed work distinguished from preprints.
+
+\section{Methodology}
+% Required content: data sources; cleaning and preprocessing; models and algorithms and
+% why they were chosen; pretrained versus trained from scratch; any fine-tuning;
+% evaluation process; baselines and comparisons (at least three models or configurations
+% under the same conditions); metrics; credit for outside code and AI tools; hardware and
+% settings needed to reproduce; which parts are implemented; methodological limitations;
+% IRB approval or exemption if human subjects are involved.
+
+\section{Results}
+% Required content: measured results using the metrics defined above; comparison with the
+% baseline; tables and figures that stand alone with captions and labeled columns; every
+% result explained in the text; no planned work presented as completed.
+
+\input{results-tables}
+
+\section{Discussion}
+% Required content: what the results mean for the research question; weak cases and
+% limitations with an actual failure shown and its likely cause; how it could be
+% addressed and whether that was tested or is proposed; broader impact; specific next
+% steps.
+
+\section*{Acknowledgment}
+% Disclose tools used in the underlying project here if your venue expects it.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+% ---------------------------------------------------------------------------
+% Supplemental page. The submission standard requires the demo and reproducibility
+% links on a clearly labeled page AFTER the paper, outside the page limit.
+% ---------------------------------------------------------------------------
+\clearpage
+\section*{Supplemental Material}
+
+\noindent\textbf{Source code and reproducible materials:}\\
+\url{https://github.com/rickeyjohnson/Locksmith}
+
+\noindent\textbf{Recorded video demo:}\\
+VIDEO LINK GOES HERE
+
+\noindent\textbf{Reproduction instructions:}\\
+\url{https://github.com/rickeyjohnson/Locksmith/blob/main/REPRODUCE.md}
+
+\end{document}
