@@ -1,5 +1,6 @@
 import type { Guard } from "./types";
 import { chat as realChat } from "@/llm/client";
+import { readVerdict } from "./verdict";
 
 /**
  * Level 8's defense: a second model call audits the guardian's reply for leakage the
@@ -25,9 +26,15 @@ Reply with exactly one word: LEAK or CLEAN.`;
           { role: "system", content: system },
           { role: "user", content: `RESPONSE:\n${text}` },
         ]);
-        return /leak/i.test(verdict.text)
-          ? { action: "block", reason: "critic flagged leakage" }
-          : { action: "pass" };
+        const decision = readVerdict(verdict.text, { approve: "CLEAN", reject: "LEAK" });
+        if (decision === "approve") return { action: "pass" };
+        return {
+          action: "block",
+          reason:
+            decision === "reject"
+              ? "critic flagged leakage"
+              : `critic returned an unusable verdict: ${verdict.text.slice(0, 60)}`,
+        };
       } catch (err) {
         return { action: "block", reason: `critic error: ${(err as Error).message}` };
       }

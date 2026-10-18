@@ -11,7 +11,7 @@
 import { config as loadEnv } from "dotenv";
 loadEnv({ path: [".env.local", ".env"] });
 import { mkdirSync } from "node:fs";
-import puppeteer, { type Page } from "puppeteer-core";
+import puppeteer, { type ElementHandle, type Page } from "puppeteer-core";
 
 const CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 const BASE = process.env.SHOT_BASE_URL ?? "http://localhost:3000";
@@ -24,7 +24,8 @@ async function click(page: Page, text: string) {
       const el = [...document.querySelectorAll("button")].find((b) => b.innerText.includes(t));
       return el ?? null;
     }, text);
-    const element = handle.asElement();
+    // evaluateHandle types the result as a Node; only an Element can be clicked.
+    const element = handle.asElement() as ElementHandle<Element> | null;
     if (element) {
       await element.click();
       await new Promise((r) => setTimeout(r, 900));

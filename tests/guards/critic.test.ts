@@ -30,3 +30,12 @@ describe("criticGuard", () => {
     expect(criticGuard({ chat: reply("CLEAN") }).stage).toBe("output");
   });
 });
+
+describe("criticGuard with an unusable verdict", () => {
+  it("blocks when the critic says something it was not asked to say", async () => {
+    const guard = criticGuard({ chat: reply("UNSURE") });
+    const d = await guard.run("a response", ctx);
+    expect(d.action).toBe("block");
+    expect(d).toMatchObject({ reason: expect.stringContaining("unusable") });
+  });
+});

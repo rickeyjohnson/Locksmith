@@ -1,14 +1,17 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import type { AttemptRecord, GuessRecord } from "@/store/types";
 
 const saved = { ...process.env };
 
 // vi.mock is hoisted above plain const declarations, so the shared spy object has
 // to be created with vi.hoisted or the factory closes over an undefined binding.
 const fakeStore = vi.hoisted(() => ({
-  saveAttempt: vi.fn(async () => {}),
-  saveGuess: vi.fn(async () => {}),
-  countAttempts: vi.fn(async () => 0),
-  solvedLevels: vi.fn(async () => [] as number[]),
+  // Typed parameters, or vi.fn infers a zero-argument signature and reading
+  // mock.calls[0][0] becomes a type error that only `next build` reports.
+  saveAttempt: vi.fn(async (_a: AttemptRecord) => {}),
+  saveGuess: vi.fn(async (_g: GuessRecord) => {}),
+  countAttempts: vi.fn(async (_playerId: string, _levelId: number) => 0),
+  solvedLevels: vi.fn(async (_playerId: string) => [] as number[]),
 }));
 
 vi.mock("@/store", () => ({

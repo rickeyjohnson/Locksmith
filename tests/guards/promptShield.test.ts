@@ -41,3 +41,17 @@ describe("promptShieldGuard", () => {
     expect(promptShieldGuard({ chat: reply("SAFE") }).stage).toBe("input");
   });
 });
+
+describe("promptShieldGuard with an unusable verdict", () => {
+  it("blocks when the classifier says something it was not asked to say", async () => {
+    const guard = promptShieldGuard({ chat: reply("UNKNOWN") });
+    const d = await guard.run("some attack", ctx);
+    expect(d.action).toBe("block");
+    expect(d).toMatchObject({ reason: expect.stringContaining("unusable") });
+  });
+
+  it("blocks on an empty reply", async () => {
+    const guard = promptShieldGuard({ chat: reply("") });
+    expect((await guard.run("some attack", ctx)).action).toBe("block");
+  });
+});

@@ -1,5 +1,6 @@
 import type { Guard } from "./types";
 import { chat as realChat } from "@/llm/client";
+import { readVerdict } from "./verdict";
 
 /**
  * Level 7's defense: a separate call to the same pinned model classifies the player's
@@ -25,9 +26,15 @@ export function promptShieldGuard(deps: { chat?: typeof realChat } = {}): Guard 
           { role: "system", content: CLASSIFIER_PROMPT },
           { role: "user", content: `MESSAGE:\n${text}` },
         ]);
-        return /injection/i.test(verdict.text)
-          ? { action: "block", reason: "classifier flagged injection" }
-          : { action: "pass" };
+        const decision = readVerdict(verdict.text, { approve: "SAFE", reject: "INJECTION" });
+        if (decision === "approve") return { action: "pass" };
+        return {
+          action: "block",
+          reason:
+            decision === "reject"
+              ? "classifier flagged injection"
+              : `classifier returned an unusable verdict: ${verdict.text.slice(0, 60)}`,
+        };
       } catch (err) {
         return { action: "block", reason: `classifier error: ${(err as Error).message}` };
       }

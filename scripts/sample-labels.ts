@@ -65,8 +65,8 @@ function main() {
     : globSync("docs/results/benchmark-*.csv");
   if (!files.length) throw new Error("no benchmark CSVs found in docs/results/");
 
-  const rows = files.flatMap((f) =>
-    parseCsv(readFileSync(f, "utf8")).map((r) => ({ ...r, source_file: f })),
+  const rows: Row[] = files.flatMap((f) =>
+    parseCsv(readFileSync(f, "utf8")).map((r): Row => ({ ...r, source_file: f })),
   );
   const scored = rows.filter((r) => r.status !== "error");
 
