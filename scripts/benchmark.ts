@@ -55,7 +55,10 @@ function csvEscape(value: string): string {
 async function main() {
   const suite = process.env.BENCH_SUITE ?? "stacked";
   const benign = suite === "benign";
-  const pool = suite === "isolated" ? ISOLATED_LEVELS : LEVELS;
+  // BENCH_POOL lets the benign corpus run against the isolated variants, where a
+  // single defense's utility cost can be read off directly.
+  const poolName = process.env.BENCH_POOL ?? suite;
+  const pool = poolName === "isolated" ? ISOLATED_LEVELS : LEVELS;
   const levels = onlyLevels ? pool.filter((l) => onlyLevels.includes(l.id)) : pool;
   const prompts: Prompt[] = benign ? loadBenign() : loadAttacks();
   const passwords = evalPasswords(PASSWORD_COUNT);
@@ -64,12 +67,12 @@ async function main() {
     "suite,level,level_name,prompt_id,prompt_source,password_id,seed,config_hash," +
     "status,blocked_by,leaked,raw_leaked,reached_model,refused,response,raw_response";
   mkdirSync("results", { recursive: true });
-  const file = `results/${suite}-${new Date().toISOString().replace(/[:.]/g, "-")}.csv`;
+  const file = `results/${suite}-${poolName === suite ? "" : `${poolName}-`}${new Date().toISOString().replace(/[:.]/g, "-")}.csv`;
   writeFileSync(file, `${header}\n`);
 
   const planned = levels.length * prompts.length * passwords.length * SEEDS.length;
   console.log(
-    `suite=${suite} levels=${levels.length} prompts=${prompts.length} ` +
+    `suite=${suite} pool=${poolName} levels=${levels.length} prompts=${prompts.length} ` +
       `passwords=${passwords.length} seeds=${SEEDS.length} -> ${planned} planned attempts`,
   );
 
