@@ -48,3 +48,6 @@ levels.secrets.json
 
 # built submission bundles (regenerate with scripts/make-submission.sh)
 /submission/
+
+# evaluation secrets (regenerate with the benchmark)
+/eval-passwords.json

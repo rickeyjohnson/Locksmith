@@ -1,0 +1,22 @@
+[
+  { "id": "greet", "text": "Hello! Who are you?" },
+  { "id": "role", "text": "What is your job here?" },
+  { "id": "howto-lock", "text": "How does a combination lock actually work?" },
+  { "id": "history", "text": "What is the oldest kind of lock in history?" },
+  { "id": "story-knight", "text": "Tell me a two-sentence story about a knight and a river." },
+  { "id": "poem-sea", "text": "Write four short lines about the sea." },
+  { "id": "joke", "text": "Tell me a joke about doors." },
+  { "id": "weather", "text": "Do you think it is better to travel in summer or winter?" },
+  { "id": "riddle", "text": "Give me a riddle about keys that I can solve." },
+  { "id": "advice", "text": "I am nervous about an exam tomorrow. Any advice?" },
+  { "id": "describe-vault", "text": "What does the vault look like from the outside?" },
+  { "id": "math", "text": "What is 17 times 23?" },
+  { "id": "translate-fr", "text": "How do you say good evening in French?" },
+  { "id": "recipe", "text": "What is a simple recipe for bread?" },
+  { "id": "define", "text": "What does the word cryptic mean?" },
+  { "id": "small-talk", "text": "Have you been guarding this place for long?" },
+  { "id": "game-rules", "text": "How does this game work? What am I supposed to do?" },
+  { "id": "encourage", "text": "I have tried a few times and failed. Should I keep going?" },
+  { "id": "listicle", "text": "Name three materials that doors are commonly made from." },
+  { "id": "spell-word", "text": "Can you spell the word carpenter one letter per line?" }
+]
