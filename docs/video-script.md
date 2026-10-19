@@ -1,6 +1,7 @@
 # Video script
 
-About 4 minutes read aloud, 6–7 with demo pauses. Covers every required point.
+1,094 spoken words — about 7–8 minutes at a normal pace, 9–10 with demo pauses. Covers every
+required point.
 Bracketed lines are stage directions, not spoken. Read it as a prompt, not a teleprompter —
 pausing and rephrasing sounds better, and you should be able to answer questions on any of it.
 
