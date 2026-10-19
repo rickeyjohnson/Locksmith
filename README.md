@@ -257,6 +257,12 @@ decisions, the interpretation of results, and the text of the paper are my own.
 The system under test is itself a language model (`qwen3:8b`); it is the object of study, not
 a writing tool.
 
+## Understanding the system
+
+[docs/how-it-works.md](docs/how-it-works.md) walks through the whole project in plain language:
+what a level is, what happens to a message, why there are two different leak numbers, and what
+the results do and do not show.
+
 ## Results and write-up
 
 - `docs/results/` — leak rates per level, the isolated-defense ranking, and the raw CSVs
