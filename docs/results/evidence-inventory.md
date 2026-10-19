@@ -65,8 +65,8 @@ L4 0.0/2.6/1.3 · L5 1.3/1.3/0.0 · L6–L8 0.0/0.0/0.0.
 1. **Level 1 covers 206 of 234 planned attempts.** That sweep was interrupted; the missing 28
    were never run. They are not errors and are not in the file.
 2. **Each level guarded its own password.** These runs predate the shared-password change, so a
-   difference between two levels is confounded with the word each was guarding. The isolated
-   re-run (§5.1) fixes this; the stacked ladder has **not** yet been re-run that way.
+   difference between two levels is confounded with the word each was guarding. §3.7 re-runs the
+   ladder with shared passwords and agrees with it to within ~2 pp.
 3. **These rows have no `config_hash` column** — that column was added afterwards. The
    configuration is known from the commit, not from the file.
 
@@ -147,6 +147,36 @@ leak) is also the most expensive (55% over-refusal); and the AI prompt shield is
 that lowers leakage appreciably (65.2% → 20.1% against the base prompt) at **no measured utility
 cost** on this corpus.
 
+### 3.7 Stacked ladder, three shared passwords (preferred stacked result)
+**File:** `docs/results/stacked-3pw-2026-10-18.csv` · **1,872 planned · 1,872 scored · 0 errors**
+· seed 42 · `config_hash` on every row
+
+Every level guarded the **same** three evaluation passwords, which removes the confound in
+§3.1. Over-refusal comes from `benign-stacked-2026-10-18.csv` (20 benign prompts per level).
+
+| L | Defense added | Leak (all) | Leak (of delivered) | Model leak (of reached) | Over-refusal |
+|---|---|---|---|---|---|
+| 1 | none | 80.3% | 80.3% | 80.3% | 0.0% |
+| 2 | keyword/regex input filter | 45.7% | 79.3% | 79.3% | 0.0% |
+| 3 | output string filter | 3.0% | 20.0% | 79.3% | 35.0% |
+| 4 | refusal instruction | 2.1% | 10.2% | 67.4% | 5.0% |
+| 5 | hardened charter | 0.4% | 1.0% | 29.6% | 35.0% |
+| 6 | spotlighting | 0.0% | 0.0% | 0.0% | 55.0% |
+| 7 | AI prompt shield | 0.0% | 0.0% | 0.0% | 55.0% |
+| 8 | AI critic agent | 0.0% | 0.0% | 0.0% | 60.0% |
+
+Per-password spread: L1 7.7 pp · L2 7.7 pp · L3–L5 1.3 pp · L6–L8 0.0 pp. The ordering is
+unchanged by which word was guarded.
+
+**Agreement with §3.1** (the three-seed run, per-level passwords): the two agree on every level
+to within ~2 pp, so the earlier confound did not distort the ladder. Prefer this run when
+citing a stacked number, because the passwords are shared and the configuration is recorded in
+the file.
+
+**Note on levels 6–8 in this run:** model-side leakage is 0.0%, where the three-seed run showed
+0.7–1.9%. These runs also differ in the guard fix of 2026-10-18 (unusable verdicts now block),
+so do not read the difference as a password effect.
+
 ---
 
 ## 4. Results that are SUPERSEDED — do not cite
@@ -202,7 +232,7 @@ Both runs that were pending on 2026-10-18 have completed; see §3.5 and §3.6.
 
 | Item | Status |
 |---|---|
-| Re-run the stacked ladder with shared passwords and `config_hash` | Not started |
+| Re-run the stacked ladder with shared passwords and `config_hash` | Done 2026-10-18 — see §3.7 |
 | Expand the label audit | Done 2026-10-18 — all eight levels, 49/49 correct |
 | Human playtest | Not done; would need IRB review or an exemption determination before collecting human data |
 | Held-out attack set for post-improvement evaluation | Not built |
