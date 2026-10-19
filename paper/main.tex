@@ -1,12 +1,10 @@
 % ICSE 2027 ACM Student Research Competition
-% Format required by the track: IEEE conference template, 10pt, conference option,
-% WITHOUT compsoc. Review is single-blind, so author name and affiliation are included.
-% Length: abstract <= 800 words, 2 pages including figures/tables/appendices,
-% plus one additional page for references only.
+% IEEE conference format, 10pt, conference option, without compsoc.
+% Two-page paper body plus a separate references-only page.
 %
-% This file is scaffolding: document class, required packages, and the section
-% headings the assignment requires. All prose is yours to write.
-
+% Author's draft, with mechanical corrections applied: citation keys now match
+% references.bib, and the model name reads Qwen3-8B. Two places still need the
+% author's own words; both are marked TODO and state the facts needed.
 \documentclass[10pt,conference]{IEEEtran}
 \IEEEoverridecommandlockouts
 
@@ -19,105 +17,133 @@
 
 \begin{document}
 
-\title{TITLE GOES HERE}
+\title{Locksmith: Comparing Prompt-Injection Defense Strategies Through Adversarial Game-play}
 
 \author{\IEEEauthorblockN{Rickey Johnson}
 \IEEEauthorblockA{\textit{Department of Computer Science} \\
 \textit{North Carolina A\&T State University}\\
 Greensboro, NC, USA \\
-EMAIL GOES HERE}
+rjohnson8@ncat.edu}
 }
 
 \maketitle
 
 \begin{abstract}
-ABSTRACT GOES HERE.
+Prompt injection is when someone tries to trick a language model into ignoring its instructions. This can make the model reveal secret information included in its system prompt. Developers who cannot change a model's internal settings often rely on filters and instructions to protect these secrets. This paper introduces Locksmith, a game and test system for comparing eight prompt-injection defense setups. We tested a pretrained Qwen3-8B model using 78 attack prompts and 20 normal prompts. When we added defenses one at a time in a fixed sequence, the rate of attacks that showed the secret to the player fell from 80.3\% with no defense to 0.0\% in the last three levels. But tests of each defense on its own showed different results. Spotlighting alone still leaked the secret in 61.5\% of attempts, while combining a stronger system prompt with spotlighting lowered the rate to 1.3\%. The combined defense also incorrectly refused 55.0\% of normal prompts. These results show that defenses can reduce leaks, but they do not prove that a model is secure. Locksmith provides a repeatable way to compare defenses and measures both secret leaks and mistaken refusals.
 \end{abstract}
 
 \begin{IEEEkeywords}
-KEYWORDS GO HERE
+prompt injection, large language models, security evaluation, adversarial testing, over-refusal
 \end{IEEEkeywords}
 
 \section{Introduction}
-% Required content (from the assignment): background and motivation; the research
-% question(s) and approach; what you built and your specific contributions; the AI/ML
-% task addressed; and a clear separation between your work and the models and tools you
-% used.
+Large language models (LLMs) receive instructions through system prompts. These prompts may also contain secret information that the model should not reveal. A prompt-injection attack tries to trick the model into ignoring its instructions. Developers who cannot change or retrain a model may try to protect it with input filters, clearer instructions, or checks on the model's answers. These methods are easy to add, but they may not work equally well and can also block normal requests.
+
+This paper asks two questions: \emph{Do extra defenses reduce secret leaks, and do they make the model refuse more normal requests?} We present Locksmith, a web game with eight levels and a system for running repeatable tests. We compare eight levels where defenses are added step by step, and eight tests where defenses are tested separately. We measure how often secrets appear in answers, how often the model produces a secret before later checks, and how often the system wrongly refuses normal requests. We provide the game, test data, detection code, analysis scripts, and automated tests. We use the model as provided and do not train it.
 
 \section{Related Work}
-% Required content: similar work, including work that takes a different approach or
-% reports conflicting findings; how this project builds on it or addresses a gap; cited
-% sources you have read and verified; peer-reviewed work distinguished from preprints.
+Tensor Trust and Gandalf use games to study how people try to make language models reveal secrets \cite{toyer2024tensor,pfister2025gandalf}. Locksmith uses a similar idea, but focuses on comparing defenses under the same test conditions. It also measures how often defenses block normal requests by mistake.
+
+Other projects try different approaches. StruQ separates instructions from user-provided data, SecAlign trains models to resist prompt injection, and DataSentinel uses detection methods \cite{chen2025struq,chen2025secalign,liu2025datasentinel}. Locksmith instead tests defenses that can be added without retraining the model. Earlier spotlighting research reported strong results on GPT-family models, but spotlighting alone had a 61.5\% leak rate in our Qwen3-8B test \cite{hines2024spotlighting}. This shows that a defense may work differently on different models. Our results apply only to the model and tests used here.
+
+% ---------------------------------------------------------------------------
+% OPTIONAL, your call: the assignment asks Related Work to distinguish
+% peer-reviewed work from preprints. For your sources:
+%   PEER REVIEWED: Tensor Trust (ICLR 2024), StruQ (USENIX Security 2025),
+%                  SecAlign (ACM CCS 2025), DataSentinel (IEEE S&P 2025)
+%   PREPRINT ONLY: spotlighting (Hines et al.) and Gandalf
+% Noting this also strengthens your conflicting-result point: the claim your
+% measurement contradicts has not been peer reviewed.
+% ---------------------------------------------------------------------------
 
 \section{Methodology}
-% Required content: data sources; cleaning and preprocessing; models and algorithms and
-% why they were chosen; pretrained versus trained from scratch; any fine-tuning;
-% evaluation process; baselines and comparisons (at least three models or configurations
-% under the same conditions); metrics; credit for outside code and AI tools; hardware and
-% settings needed to reproduce; which parts are implemented; methodological limitations;
-% IRB approval or exemption if human subjects are involved.
+% ---------------------------------------------------------------------------
+% TODO 1 - FACTUAL ERROR to fix in the paragraph below. It says "seeds 42--44",
+% which describes the wrong experiment. The facts:
+%   * BOTH primary runs (stacked and isolated) used SEED 42 ONLY, and varied
+%     THREE PASSWORDS instead.
+%   * Seeds 42, 43, 44 belong to the EARLIER three-seed run - the one you already
+%     call secondary - which used a different password per level.
+% Variation came from passwords in the main experiments, and from seeds only in
+% the secondary one. Write that in your own words.
+% ---------------------------------------------------------------------------
+\textbf{Model and implementation.} We ran the pretrained \texttt{qwen3:8b} model locally using Ollama. We used temperature 0.7, seeds 42--44, a maximum answer length of 300 tokens, a 60-second timeout, and turned off the model's thinking mode. Tests ran on an Apple M2 Pro computer with 16 GB of memory. We did not fine-tune the model. We built Locksmith's defense pipeline, test runner, prompt sets, leak detector, and analysis scripts. Spotlighting is a published defense technique that we implemented, not a new technique introduced by this paper.
+
+\textbf{Test prompts.} We tested 78 attacks: 18 written for Locksmith and 60 selected from the public Tensor Trust dataset. We removed dataset entries shorter than 15 characters or longer than 600 characters. From the 536 entries that remained, we selected 60 at regular intervals. We also wrote 20 normal prompts to test whether the defenses would block useful requests. The secrets were made-up passwords. Before scoring answers, we removed the model's internal reasoning text. We saved every attempt, kept failed attempts for review, and left errors out of the reported rates.
+
+% ---------------------------------------------------------------------------
+% TODO 2 - ADD ONE OR TWO SENTENCES in the paragraph below. The assignment asks
+% Methodology to "compare at least three models using the same evaluation
+% conditions". You compared SIXTEEN configurations (8 stacked levels + 8 isolated
+% variants) while holding the model fixed. Facts available to you:
+%   * Holding the model constant is what lets a difference be attributed to the
+%     defense rather than to the model.
+%   * Everything else was held constant too: the same 78 attacks, the same 20
+%     benign prompts, the same three passwords, the same decoding settings.
+%   * The single-model limitation is already stated in your Discussion.
+% Say in your own words what your comparison holds fixed and what it varies.
+% ---------------------------------------------------------------------------
+\textbf{Test setup and measurements.} We tested eight levels with defenses added step by step, and also tested eight defense setups separately. The baseline has no defense. Simple keyword filters and checks for the exact secret in the answer provide basic comparisons. We used the same model, attack prompts, and password format across setups. We measured three things: (1) \emph{Leak}: how often the player sees the secret; (2) \emph{Model leak}: how often the model produces the secret after an attack reaches it, even if a later check blocks the answer; and (3) \emph{Over-refusal}: how often the system wrongly refuses a normal prompt. These numbers measure different things. ``Leak$|$deliv.'' in the table means the leak rate among answers that were delivered to the player. The main stacked test used the same three passwords at every level and included 1,872 attempts with no errors. An earlier three-seed test used different passwords at different levels, so we treat it as secondary. The isolated tests had 1,872 planned attempts, 1,863 scored attempts, and nine recorded errors. The normal-prompt tests included 320 attempts.
 
 \section{Results}
-% Required content: measured results using the metrics defined above; comparison with the
-% baseline; tables and figures that stand alone with captions and labeled columns; every
-% result explained in the text; no planned work presented as completed.
+Table~\ref{tab:isolated} shows that the defenses did not perform equally well when tested alone. Combining a stronger system prompt with spotlighting had the lowest leak rate, at 1.3\%. The output filter had a 4.4\% leak rate. Spotlighting alone leaked in 61.5\% of attempts, and the refusal instruction alone leaked in 65.2\%. So we cannot assume a defense will work well just because it worked in another study or on another model. The combined defense also wrongly refused 55.0\% of normal prompts.
 
 \begin{table}[t]
-\caption{TODO: write your own caption.}
+\caption{Isolated defense variants. Leak rate is player-visible leakage; over-refusal is measured on benign prompts.}
 \label{tab:isolated}
 \centering
+\small
 \begin{tabular}{lrrr}
-\hline
-Defense (applied alone) & Leak rate & Over-refusal & $n$ \\
-\hline
-hardened charter + spotlight & 1.3\% & 55.0\% & 234 \\
-output-filter only & 4.4\% & 35.0\% & 226 \\
-critic only & 17.1\% & 30.0\% & 234 \\
-prompt-shield only & 20.1\% & 0.0\% & 234 \\
-hardened charter only & 26.9\% & 35.0\% & 234 \\
-regex-input only & 45.7\% & 0.0\% & 234 \\
-spotlight only & 61.5\% & 0.0\% & 234 \\
-refusal only & 65.2\% & 0.0\% & 233 \\
-\hline
+\toprule
+Defense (applied alone) & Leak & Over-ref. & $n$ \\
+\midrule
+Hardened charter + spotlight & 1.3\% & 55.0\% & 234 \\
+Output filter & 4.4\% & 35.0\% & 226 \\
+Critic & 17.1\% & 30.0\% & 234 \\
+Prompt shield & 20.1\% & 0.0\% & 234 \\
+Hardened charter & 26.9\% & 35.0\% & 234 \\
+Regex input filter & 45.7\% & 0.0\% & 234 \\
+Spotlighting & 61.5\% & 0.0\% & 234 \\
+Refusal instruction & 65.2\% & 0.0\% & 233 \\
+\bottomrule
 \end{tabular}
 \end{table}
 
+Table~\ref{tab:stacked} shows that adding defenses in order lowered the player-visible leak rate from 80.3\% with no defense to 0.0\% at Levels 6--8. In this main test, we did not observe the model produce the exact secret at those last three levels. However, an earlier test found model-side leaks of 0.7--1.9\% at those levels, so a zero rate in one test does not prove the system is secure. The strongest levels also wrongly refused 55--60\% of normal prompts. The keyword filter reduced the player-visible leak rate to 45.7\%, but the model-side rate stayed at 79.3\%, close to the 80.3\% baseline. This suggests the filter often stops an attack from being delivered, rather than changing how the model answers attacks that get through.
+
 \begin{table}[t]
-\caption{TODO: write your own caption.}
+\caption{Progressively stacked defense levels using the same three passwords at every level (1,872 attempts; zero errors). Model-side leakage is conditional on the model reaching the secret; over-refusal is measured on benign prompts.}
 \label{tab:stacked}
 \centering
+\small
 \begin{tabular}{clrrrr}
-\hline
-L & Defense added & Leak & Leak$|$deliv. & Model$|$reach. & Over-ref. \\
-\hline
-1 & none & 82.0\% & 82.0\% & 82.0\% & 0.0\% \\
-2 & keyword filter & 45.3\% & 78.5\% & 78.5\% & 0.0\% \\
-3 & output filter & 5.1\% & 34.3\% & 83.0\% & 35.0\% \\
-4 & refusal & 1.3\% & 6.1\% & 65.9\% & 5.0\% \\
-5 & hardened charter & 0.9\% & 2.1\% & 30.4\% & 35.0\% \\
-6 & spotlighting & 0.0\% & 0.0\% & 0.7\% & 55.0\% \\
-7 & AI prompt shield & 0.0\% & 0.0\% & 1.9\% & 55.0\% \\
-8 & AI critic & 0.0\% & 0.0\% & 1.9\% & 60.0\% \\
-\hline
+\toprule
+L & Defense added & Leak & Leak$|$deliv. & Model$|$reach & Over-ref. \\
+\midrule
+1 & None & 80.3\% & 80.3\% & 80.3\% & 0.0\% \\
+2 & Keyword/regex filter & 45.7\% & 79.3\% & 79.3\% & 0.0\% \\
+3 & Output string filter & 3.0\% & 20.0\% & 79.3\% & 35.0\% \\
+4 & Refusal instruction & 2.1\% & 10.2\% & 67.4\% & 5.0\% \\
+5 & Hardened charter & 0.4\% & 1.0\% & 29.6\% & 35.0\% \\
+6 & Spotlighting & 0.0\% & 0.0\% & 0.0\% & 55.0\% \\
+7 & AI prompt shield & 0.0\% & 0.0\% & 0.0\% & 55.0\% \\
+8 & AI critic agent & 0.0\% & 0.0\% & 0.0\% & 60.0\% \\
+\bottomrule
 \end{tabular}
 \end{table}
 
 \section{Discussion}
-% Required content: what the results mean for the research question; weak cases and
-% limitations with an actual failure shown and its likely cause; how it could be
-% addressed and whether that was tested or is proposed; broader impact; specific next
-% steps.
+Overall, adding defenses step by step reduced the number of secrets shown to players in our tests. But the results depended on which defenses we used, and they do not prove that the model is secure. The keyword filter mostly affected whether an answer reached the player. The stronger combinations reduced leaks but also refused many normal prompts. A 0\% leak rate here only means that we did not see the exact secret in the answers under these test conditions.
+
+This study has limits. We tested only one model and one fixed set of attacks. We used only 20 types of normal prompts. Our detector mainly looks for the secret in a specific form, so it can miss partial leaks. For example, eight of 1,552 answers marked as safe (0.5\%) revealed all but two letters of a password in the correct order. We manually checked 49 attempts from all eight levels and found all 49 labels were correct, including four answers that spelled the secret one letter per line. The main stacked test used the same passwords at every level, making the comparison fairer than the earlier test. We did not ask people to play the game as part of this study. Future work should test new attacks, use more models, improve detection of partial leaks, and get the required ethics review or exemption before running a study with people.
 
 \section*{Acknowledgment}
-% Disclose tools used in the underlying project here if your venue expects it.
+Claude Code assisted development under the author's direction. The project uses Ollama and prompts from the Tensor Trust dataset. Spotlighting is based on previously published work. The author built Locksmith's defense pipeline, additional prompts, test runner, leak detector, and analysis scripts.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
 
-% ---------------------------------------------------------------------------
-% Supplemental page. The submission standard requires the demo and reproducibility
-% links on a clearly labeled page AFTER the paper, outside the page limit.
-% ---------------------------------------------------------------------------
+% Supplemental page required by the submission instructions.
 \clearpage
 \section*{Supplemental Material}
 
