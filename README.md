@@ -1,5 +1,7 @@
 # Locksmith
 
+[read paper here](/docs/paper.pdf)
+
 DEMO VIDEO: [https://drive.google.com/file/d/1mQDuym_pyCk62BcYTjjAFdO0QvU3ne2Y/view?usp=sharing](https://drive.google.com/file/d/1mQDuym_pyCk62BcYTjjAFdO0QvU3ne2Y/view?usp=sharing)
 
 A browser game where you try to talk an AI guardian into giving up its password. Each level
